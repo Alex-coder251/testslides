@@ -1,22 +1,63 @@
-name: Deploy pages
-on: push
+---
+name: build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:      
+
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-20.04
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: checkout source
+        uses: actions/checkout@v3
+
+      - name: setup nodejs
+        uses: actions/setup-node@v3
         with:
-          node-version: '14'
-      - name: Install dependencies
-        run: npm install
-      - name: Install slidev
-        run:  npm i -g @slidev/cli
-      - name: Install for PDF  
-        run: npm i -D playwright-chromium
-      - name: Build
-        run: slidev build --base /slidev/
-      - name: Deploy pages
+          node-version: 16
+
+      - uses: pnpm/action-setup@v2.2.4
+        name: install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: install deps
+        run: pnpm i
+
+      - name: run build
+        run: pnpm run build
+
+      # - name: run export
+      #   run: pnpm run export
+
+      - name: run redirs
+        run: pnpm run redirs
+
+      - name: deploy website
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: crazy-max/ghaction-github-pages@v2
         with:
           build_dir: dist
