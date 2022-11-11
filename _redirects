@@ -1,0 +1,6 @@
+http://boerger-talks.netlify.com/* https://talks.boerger.ws/:splat 301!
+https://boerger-talks.netlify.com/* https://talks.boerger.ws/:splat 301!
+/template/*    /template/index.html   200
+/b-all-older-adults/*    /b-all-older-adults/index.html   200
+/kaposi/*    /kaposi/index.html   200
+/pheochromocytoma/*    /pheochromocytoma/index.html   200
