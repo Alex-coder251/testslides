@@ -63,4 +63,4 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         uses: crazy-max/ghaction-github-pages@v2
         with:
-          build_dir: deploy --prod --dir dist/
+          build_dir: dist
