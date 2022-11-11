@@ -61,6 +61,6 @@ jobs:
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-        uses: careflow/netlify-actions/cli@master
+        uses: crazy-max/ghaction-github-pages@v2
         with:
           args: deploy --prod --dir dist/
