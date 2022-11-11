@@ -58,9 +58,8 @@ jobs:
 
       - name: deploy website
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        env:
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         uses: crazy-max/ghaction-github-pages@v2
         with:
           build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
