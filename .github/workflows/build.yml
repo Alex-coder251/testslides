@@ -1,69 +1,24 @@
----
-name: build
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-  workflow_dispatch:      
-
+name: Deploy pages
+on: push
 jobs:
-  build:
-    runs-on: ubuntu-20.04
-
+  deploy:
+    runs-on: ubuntu-latest
     steps:
-      - name: checkout source
-        uses: actions/checkout@v3
-
-      - name: setup nodejs
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: 16
-
-      - uses: pnpm/action-setup@v2.2.4
-        name: install pnpm
-        id: pnpm-install
+          node-version: '14'
+      - name: Install dependencies
+        run: npm install
+      - name: Install slidev
+        run:  npm i -g @slidev/cli
+      - name: Install for PDF  
+        run: npm i -D playwright-chromium
+      - name: Build
+        run: slidev build --base /slidev/
+      - name: Deploy pages
+        uses: crazy-max/ghaction-github-pages@v2
         with:
-          version: 7
-          run_install: false
-
-      - name: get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v3
-        name: setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: install deps
-        run: pnpm i
-
-      - name: run build
-        run: pnpm run build
-
-      # - name: run export
-      #   run: pnpm run export
-
-      - name: run redirs
-        run: pnpm run redirs
-
-      - name: deploy website
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          # Github 会在 workflow 中自动生成 GIHUBT_TOKEN，用于认证 workflow 的运行
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # 静态资源目录设置
-          publish_dir: ./build
-          # 默认发布到 gh-pages 分支上，可以指定特定的发布分支（不能选拉取代码的分支）
-          publish_branch: gh-pages
-          full_commit_message: ${{ github.event.head_commit.message }}
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
